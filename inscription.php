@@ -70,23 +70,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body class="bg-light">
 
-    <!-- HEADER / NAVIGATION (Mise en page commune - Critère de la grille) -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom border-dark border-2">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="index.php">PIXEL BRAWLERS</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav mx-auto">
-                    <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="index.php">ACCUEIL</a></li>
-                    <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="#">JEUX</a></li>
-                    <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="#">COMMUNAUTÉ</a></li>
-                </ul>
-                <a href="index.php" class="btn btn-outline-dark fw-bold rounded-0">CONNEXION</a>
+   <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom border-dark border-2">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="index.php">PIXEL BRAWLERS</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="index.php">ACCUEIL</a></li>
+                <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="arene.php">ARÈNE</a></li>
+                <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="communaute.php">COMMUNAUTÉ</a></li>
+                <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="support.php">SUPPORT</a></li>
+                
+                <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                    <li class="nav-item"><a class="nav-link text-danger fw-bold" href="admin.php">⚙️ ADMIN</a></li>
+                <?php endif; ?>
+            </ul>
+            
+            <div class="d-flex align-items-center mt-3 mt-lg-0">
+                <?php if (isset($_SESSION['id_user'])): ?>
+                    <a href="ma_brute.php" class="btn btn-dark btn-sm fw-bold rounded-0 me-2">MA BRUTE</a>
+                    <a href="deconnexion.php" class="btn btn-outline-danger btn-sm fw-bold rounded-0">DÉCONNEXION</a>
+                <?php else: ?>
+                    <a href="inscription.php" class="btn btn-outline-dark btn-sm fw-bold rounded-0">S'INSCRIRE</a>
+                <?php endif; ?>
             </div>
         </div>
-    </nav>
+    </div>
+</nav>
 
     <!-- FORMULAIRE D'INSCRIPTION ADAPTATIF (Critère vue mobile) -->
     <div class="container mt-5 mb-5">
