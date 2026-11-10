@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!empty($email) && !empty($password) && !empty($password_confirm)) {
         if ($password === $password_confirm) {
             
-            // 1. Vérification si l'email existe déjà (Critère de la grille)
+            // 1. Vérification si l'email existe déjà 
             $sql_check = "SELECT id_user FROM utilisateurs WHERE email = :email";
             $stmt_check = $pdo->prepare($sql_check);
             $stmt_check->execute([':email' => $email]);
@@ -137,8 +137,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-```[cite: 9]
-
-Teste de créer un compte, puis essaie de recréer un compte avec exactement le même email pour valider le message d'erreur. 
-
-<FollowUp label="Gérer l'interface Administrateur ?" query="Une fois l'inscription validée, veux-tu qu'on s'occupe de la séparation des rôles (Joueur vs Admin) pour valider le bloc 'Connecter un administrateur' de ta grille ?"/>
