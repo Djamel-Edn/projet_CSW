@@ -21,7 +21,7 @@ $brute_candidat = null;
 if (!$id_defi || !$id_candidature) {
     $erreur = "Informations manquantes pour lancer le combat.";
 } else {
-    // 1. Vérification : le défi appartient-il à l'utilisateur et est-il bien ouvert ?
+    // 1. Vérification du défi
     $sql_defi = "SELECT * FROM defis WHERE id_defi = :id_defi AND id_auteur = :id_auteur AND etat = 'ouvert' LIMIT 1";
     $stmt_defi = $pdo->prepare($sql_defi);
     $stmt_defi->execute([':id_defi' => $id_defi, ':id_auteur' => $id_user]);
@@ -30,13 +30,12 @@ if (!$id_defi || !$id_candidature) {
     if (!$defi) {
         $erreur = "Ce combat a déjà eu lieu ou le défi ne t'appartient pas.";
     } else {
-        // 2. Récupération de la brute de l'auteur (Joueur 1)
+        // 2. Récupération des deux brutes
         $sql_auteur = "SELECT * FROM brutes WHERE id_user = :id_user";
         $stmt_auteur = $pdo->prepare($sql_auteur);
         $stmt_auteur->execute([':id_user' => $id_user]);
         $brute_auteur = $stmt_auteur->fetch();
 
-        // 3. Récupération de la brute du candidat sélectionné (Joueur 2)
         $sql_candidat = "SELECT b.*, c.id_candidat FROM candidatures c 
                          JOIN brutes b ON c.id_candidat = b.id_user 
                          WHERE c.id_candidature = :id_candidature AND c.id_defi = :id_defi";
@@ -47,14 +46,52 @@ if (!$id_defi || !$id_candidature) {
         if (!$brute_auteur || !$brute_candidat) {
             $erreur = "Impossible de trouver les combattants dans l'Arène.";
         } else {
-            // 4. SIMULATION DU COMBAT
-            $chance_auteur = rand(1, 10);
-            $chance_candidat = rand(1, 10);
+            // 3. INITIALISATION DU COMBAT
+            $pv_auteur = 30; // Règle stricte du sujet au début de chaque combat
+            $pv_candidat = 30;
+            
+            $force_auteur = (int)$brute_auteur['force_brute'];
+            $def_auteur = (int)$brute_auteur['defense'];
+            
+            $force_candidat = (int)$brute_candidat['force_brute'];
+            $def_candidat = (int)$brute_candidat['defense'];
 
-            $score_auteur = ($brute_auteur['force_brute'] * 1.5) + ($brute_auteur['defense'] * $chance_auteur);
-            $score_candidat = ($brute_candidat['force_brute'] * 1.5) + ($brute_candidat['defense'] * $chance_candidat);
+            $rapport = "⚔️ Le combat commence dans l'Arène !\n\n";
 
-            if ($score_auteur >= $score_candidat) {
+            // Tirage au sort de celui qui attaque en premier (1 = Auteur, 2 = Candidat)
+            $tour = rand(1, 2);
+
+            // 4. BOUCLE DE COMBAT AU TOUR PAR TOUR
+            while ($pv_auteur > 0 && $pv_candidat > 0) {
+                if ($tour === 1) {
+                    // L'Auteur attaque
+                    $degats = $force_auteur + rand(0, 2) - $def_candidat;
+                    $degats = max(1, $degats); // Minimum 1 point de dégât
+                    
+                    $pv_candidat -= $degats;
+                    $pv_affiches = max(0, $pv_candidat); // Affichage minimum à 0
+                    
+                    $rapport .= "➔ {$brute_auteur['pseudo']} attaque ! Il inflige $degats dégâts.\n";
+                    $rapport .= "   Il reste $pv_affiches PV à {$brute_candidat['pseudo']}.\n\n";
+                    
+                    $tour = 2; // Au tour de l'adversaire
+                } else {
+                    // Le Candidat attaque
+                    $degats = $force_candidat + rand(0, 2) - $def_auteur;
+                    $degats = max(1, $degats);
+                    
+                    $pv_auteur -= $degats;
+                    $pv_affiches = max(0, $pv_auteur);
+                    
+                    $rapport .= "➔ {$brute_candidat['pseudo']} riposte ! Il inflige $degats dégâts.\n";
+                    $rapport .= "   Il reste $pv_affiches PV à {$brute_auteur['pseudo']}.\n\n";
+                    
+                    $tour = 1;
+                }
+            }
+
+            // 5. DÉTERMINATION DU VAINQUEUR
+            if ($pv_auteur > 0) {
                 $id_vainqueur = $brute_auteur['id_user'];
                 $id_perdant = $brute_candidat['id_user'];
                 $nom_vainqueur = $brute_auteur['pseudo'];
@@ -64,12 +101,9 @@ if (!$id_defi || !$id_candidature) {
                 $nom_vainqueur = $brute_candidat['pseudo'];
             }
 
-            $rapport = "Le combat fut d'une violence inouïe !\n";
-            $rapport .= "{$brute_auteur['pseudo']} a frappé avec une intensité de " . round($score_auteur) . ".\n";
-            $rapport .= "{$brute_candidat['pseudo']} a riposté avec une intensité de " . round($score_candidat) . ".\n";
-            $rapport .= "Vainqueur final : **$nom_vainqueur** !";
+            $rapport .= "🏆 Le combat est terminé. Le vainqueur est $nom_vainqueur !";
 
-            // 5. MISES À JOUR DANS LA BASE DE DONNÉES (Transaction)
+            // 6. SAUVEGARDE EN BASE DE DONNÉES (Transaction)
             try {
                 $pdo->beginTransaction();
 
@@ -104,6 +138,15 @@ if (!$id_defi || !$id_candidature) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pixel Brawlers - Résultat du Combat</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .rapport-box {
+            max-height: 300px;
+            overflow-y: auto;
+            background-color: #f8f9fa;
+            font-family: monospace;
+            font-size: 0.95rem;
+        }
+    </style>
 </head>
 <body class="bg-light">
 
@@ -142,7 +185,7 @@ if (!$id_defi || !$id_candidature) {
                         💥 Résultat du Combat
                     </div>
                     
-                    <div class="card-body p-5">
+                    <div class="card-body p-4 p-md-5">
                         <?php if (!empty($erreur)): ?>
                             <div class="alert alert-danger rounded-0 border-dark shadow-sm">
                                 <strong>Halte !</strong> <?= htmlspecialchars($erreur) ?>
@@ -154,15 +197,17 @@ if (!$id_defi || !$id_candidature) {
                                 <div class="col-5">
                                     <div class="display-3"><?= htmlspecialchars($brute_auteur['avatar']) ?></div>
                                     <h4 class="fw-bold text-uppercase mt-2"><?= htmlspecialchars($brute_auteur['pseudo']) ?></h4>
+                                    <span class="badge bg-danger rounded-0">❤️ 30 PV</span>
                                 </div>
                                 <div class="col-2 display-5 fw-bold text-danger">VS</div>
                                 <div class="col-5">
                                     <div class="display-3"><?= htmlspecialchars($brute_candidat['avatar']) ?></div>
                                     <h4 class="fw-bold text-uppercase mt-2"><?= htmlspecialchars($brute_candidat['pseudo']) ?></h4>
+                                    <span class="badge bg-danger rounded-0">❤️ 30 PV</span>
                                 </div>
                             </div>
 
-                            <div class="alert alert-light border border-dark rounded-0 text-start fst-italic p-4 mb-4 shadow-sm">
+                            <div class="rapport-box border border-dark rounded-0 text-start p-4 mb-4 shadow-inner">
                                 <?= nl2br(htmlspecialchars($rapport)) ?>
                             </div>
 
@@ -172,9 +217,9 @@ if (!$id_defi || !$id_candidature) {
                                 <h2 class="text-danger fw-bold text-uppercase">Tu as mordu la poussière... 💀</h2>
                             <?php endif; ?>
 
-                            <div class="mt-5">
-                                <a href="arene.php" class="btn btn-dark fw-bold rounded-0 px-5 me-2">L'ARÈNE</a>
-                                <a href="ma_brute.php" class="btn btn-outline-dark fw-bold rounded-0 px-4">MON PROFIL</a>
+                            <div class="mt-4">
+                                <a href="arene.php" class="btn btn-dark fw-bold rounded-0 px-5 me-2 mb-2">L'ARÈNE</a>
+                                <a href="ma_brute.php" class="btn btn-outline-dark fw-bold rounded-0 px-4 mb-2">MON PROFIL</a>
                             </div>
 
                         <?php endif; ?>
