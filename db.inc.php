@@ -1,5 +1,5 @@
 <?php
-// db.inc.php
+db.inc.php
 // version locale
 // $host = 'localhost'; 
 // $dbname = 'pixel_brawlers';
