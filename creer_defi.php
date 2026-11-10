@@ -2,7 +2,7 @@
 session_start();
 
 if (!isset($_SESSION['id_user'])) {
-    header('Location: index.php');
+    header('Location: index.php?erreur=acces_refuse');
     exit();
 }
 
@@ -67,15 +67,23 @@ if ($peut_creer && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav mx-auto">
-                    <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="index.php">ACCUEIL</a></li>
-                    <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="arene.php">ARÈNE</a></li>
-                    <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="communaute.php">COMMUNAUTÉ</a></li>
-                    <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="support.php">SUPPORT</a></li>
-                    <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
-                        <li class="nav-item"><a class="nav-link text-danger fw-bold" href="admin.php">⚙️ ADMIN</a></li>
-                    <?php endif; ?>
-                </ul>
+               <ul class="navbar-nav mx-auto">
+    <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+        
+        <!-- Liste 1 : Admin -->
+        <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="communaute.php">COMMUNAUTÉ</a></li>
+        <li class="nav-item"><a class="nav-link text-danger fw-bold" href="admin.php">⚙️ ADMIN PANEL</a></li>
+        
+    <?php else: ?>
+        
+        <!-- Liste 2 : Visiteurs / Joueurs -->
+        <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="index.php">ACCUEIL</a></li>
+        <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="arene.php">ARÈNE</a></li>
+        <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="communaute.php">COMMUNAUTÉ</a></li>
+        <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="support.php">SUPPORT</a></li>
+        
+    <?php endif; ?>
+</ul>
                 <div class="d-flex align-items-center mt-3 mt-lg-0">
                     <a href="ma_brute.php" class="btn btn-dark btn-sm fw-bold rounded-0 me-2">MA BRUTE</a>
                     <a href="deconnexion.php" class="btn btn-outline-danger btn-sm fw-bold rounded-0">DÉCONNEXION</a>

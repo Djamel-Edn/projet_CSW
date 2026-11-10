@@ -1,8 +1,6 @@
 <?php
-// On démarre la session avant tout code HTML
 session_start();
 
-// Si l'utilisateur est déjà connecté, on le redirige vers l'espace joueur
 if (isset($_SESSION['id_user'])) {
     header('Location: ma_brute.php');
     exit();
@@ -11,6 +9,11 @@ if (isset($_SESSION['id_user'])) {
 require_once 'db.inc.php';
 
 $erreur = '';
+
+// Interception de l'erreur de redirection (protection des pages)
+if (isset($_GET['erreur']) && $_GET['erreur'] === 'acces_refuse') {
+    $erreur = "Accès refusé : Vous devez être connecté pour accéder à cette page.";
+}
 
 // Traitement du formulaire de connexion
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -25,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($user !== false) {
             if ($user['actif'] != 1) {
-                $erreur = "Le compte a été désactivé dans la base de données.";
+                $erreur = "Le compte a été désactivé par un administrateur.";
             } elseif (!password_verify($password, $user['mot_de_passe'])) {
                 $erreur = "Le mot de passe est incorrect.";
             } else {
@@ -36,23 +39,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit();
             }
         } else {
-            $erreur = "Aucun compte trouvé avec cet email. Vérifiez l'orthographe.";
+            $erreur = "Aucun compte trouvé avec cet email.";
         }
     } else {
         $erreur = "Veuillez remplir tous les champs.";
     }
 }
 
-// ---------------------------------------------------------
-// NOUVEAU : Récupération des défis ouverts pour l'affichage
-// ---------------------------------------------------------
-$sql_defis = "SELECT d.id_defi, d.titre, d.description, b.pseudo, b.avatar 
-              FROM defis d
-              JOIN brutes b ON d.id_auteur = b.id_user
-              WHERE d.etat = 'ouvert'
-              ORDER BY d.id_defi DESC";
-$stmt_defis = $pdo->query($sql_defis);
-$defis_ouverts = $stmt_defis->fetchAll();
+// APERÇU POUR LES VISITEURS (Critère de la grille)
+// 1. Les 3 derniers défis
+$sql_defis = "SELECT d.id_defi, d.titre, b.pseudo, b.avatar 
+              FROM defis d JOIN brutes b ON d.id_auteur = b.id_user 
+              WHERE d.etat = 'ouvert' ORDER BY d.id_defi DESC LIMIT 3";
+$defis_apercu = $pdo->query($sql_defis)->fetchAll();
+
+// 2. Les 3 meilleures brutes
+$sql_brutes = "SELECT id_user, pseudo, avatar, victoires 
+               FROM brutes ORDER BY victoires DESC LIMIT 3";
+$brutes_apercu = $pdo->query($sql_brutes)->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -70,118 +74,122 @@ $defis_ouverts = $stmt_defis->fetchAll();
             justify-content: center;
             border: 1px solid #ccc;
         }
-        .login-box {
-            border: 2px solid #333;
-            padding: 20px;
-            background-color: #fff;
-        }
     </style>
 </head>
 <body class="bg-light">
 
-   <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom border-dark border-2">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="index.php">PIXEL BRAWLERS</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav mx-auto">
-                <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="index.php">ACCUEIL</a></li>
-                <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="arene.php">ARÈNE</a></li>
-                <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="communaute.php">COMMUNAUTÉ</a></li>
-                <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="support.php">SUPPORT</a></li>
-                
-                <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
-                    <li class="nav-item"><a class="nav-link text-danger fw-bold" href="admin.php">⚙️ ADMIN</a></li>
-                <?php endif; ?>
-            </ul>
-            
-            <div class="d-flex align-items-center mt-3 mt-lg-0">
-                <?php if (isset($_SESSION['id_user'])): ?>
-                    <a href="ma_brute.php" class="btn btn-dark btn-sm fw-bold rounded-0 me-2">MA BRUTE</a>
-                    <a href="deconnexion.php" class="btn btn-outline-danger btn-sm fw-bold rounded-0">DÉCONNEXION</a>
-                <?php else: ?>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom border-dark border-2">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="index.php">PIXEL BRAWLERS</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto">
+    <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+        
+        <!-- Liste 1 : Admin -->
+        <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="communaute.php">COMMUNAUTÉ</a></li>
+        <li class="nav-item"><a class="nav-link text-danger fw-bold" href="admin.php">⚙️ ADMIN PANEL</a></li>
+        
+    <?php else: ?>
+        
+        <!-- Liste 2 : Visiteurs / Joueurs -->
+        <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="index.php">ACCUEIL</a></li>
+        <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="arene.php">ARÈNE</a></li>
+        <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="communaute.php">COMMUNAUTÉ</a></li>
+        <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="support.php">SUPPORT</a></li>
+        
+    <?php endif; ?>
+</ul>
+                <div class="d-flex align-items-center mt-3 mt-lg-0">
                     <a href="inscription.php" class="btn btn-outline-dark btn-sm fw-bold rounded-0">S'INSCRIRE</a>
-                <?php endif; ?>
+                </div>
             </div>
         </div>
-    </div>
-</nav>
+    </nav>
 
-    <!-- BANNIÈRE & CONNEXION -->
-    <div class="container mt-4">
-        <div class="row g-4">
+    <div class="container mt-4 mb-5">
+        
+        <?php if (!empty($erreur)): ?>
+            <div class="alert alert-danger rounded-0 fw-bold shadow-sm text-center mb-4" role="alert">
+                <?= htmlspecialchars($erreur) ?>
+            </div>
+        <?php endif; ?>
+
+        <!-- BANNIÈRE & CONNEXION -->
+        <div class="row g-4 mb-5">
             <div class="col-lg-8">
-                <div class="hero-banner flex-column position-relative shadow-sm">
-                    <h1 class="display-4 fw-bold mb-4">PIXEL BRAWLERS</h1>
-                    <a href="inscription.php" class="btn btn-dark border-dark rounded-0 px-4 py-2 text-white fw-bold">JOUER</a>
-                    <p class="mt-4 text-muted px-4 text-center">Inscrivez-vous, créez votre brute et affrontez d'autres joueurs dans l'Arène !</p>
+                <div class="hero-banner flex-column position-relative shadow-sm text-center">
+                    <h1 class="display-4 fw-bold mb-3">PIXEL BRAWLERS</h1>
+                    <p class="text-muted px-4 mb-4">Créez votre brute et affrontez d'autres joueurs dans l'Arène !</p>
+                    <a href="inscription.php" class="btn btn-dark border-dark rounded-0 px-4 py-2 text-white fw-bold">CRÉER UN COMPTE</a>
                 </div>
             </div>
 
             <div class="col-lg-4">
-                <div class="login-box shadow-sm">
-                    <h5 class="fw-bold mb-4 text-center">CONNEXION JOUEUR</h5>
-                    
-                    <?php if (!empty($erreur)): ?>
-                        <div class="alert alert-danger p-2 mb-3" style="font-size: 0.85rem;" role="alert">
-                            <?= htmlspecialchars($erreur) ?>
-                        </div>
-                    <?php endif; ?>
-
+                <div class="card border-dark rounded-0 shadow-sm p-4 h-100">
+                    <h5 class="fw-bold mb-4 text-center">CONNEXION</h5>
                     <form action="index.php" method="POST">
                         <div class="mb-3">
-                            <label for="identifiant" class="form-label fw-semibold" style="font-size: 0.9rem;">Email</label>
-                            <input type="email" class="form-control border-dark rounded-0" id="identifiant" name="identifiant" required>
+                            <label class="form-label fw-semibold small">Email</label>
+                            <input type="email" class="form-control border-dark rounded-0" name="identifiant" required>
                         </div>
                         <div class="mb-4">
-                            <label for="password" class="form-label fw-semibold" style="font-size: 0.9rem;">Mot de passe</label>
-                            <input type="password" class="form-control border-dark rounded-0" id="password" name="password" required>
+                            <label class="form-label fw-semibold small">Mot de passe</label>
+                            <input type="password" class="form-control border-dark rounded-0" name="password" required>
                         </div>
-                        <button type="submit" class="btn btn-dark w-100 border-dark rounded-0 fw-bold">CONNEXION</button>
-                        
-                        <div class="mt-3 text-center">
-                            <a href="inscription.php" class="text-dark" style="font-size: 0.85rem;">Pas encore de compte ? S'inscrire</a>
-                        </div>
+                        <button type="submit" class="btn btn-dark w-100 rounded-0 fw-bold">JOUER</button>
                     </form>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- SECTION : DÉFIS EN COURS DANS L'ARÈNE -->
-    <div class="container mt-5 mb-5">
-        <h5 class="fw-bold mb-4 text-uppercase border-bottom border-dark pb-2">Défis en cours dans l'Arène</h5>
-        
+        <!-- APERÇU DES DONNÉES (POUR LE CORRECTEUR) -->
         <div class="row g-4">
-            <?php if (empty($defis_ouverts)): ?>
-                <div class="col-12">
-                    <div class="alert alert-light border-dark text-center rounded-0" role="alert">
-                        L'arène est calme... Aucun défi n'est ouvert pour le moment.
+            <div class="col-md-6">
+                <div class="card border-dark rounded-0 shadow-sm h-100">
+                    <div class="card-header bg-dark text-white rounded-0 fw-bold text-uppercase">Derniers défis ouverts</div>
+                    <div class="list-group list-group-flush rounded-0">
+                        <?php if (empty($defis_apercu)): ?>
+                            <div class="p-3 text-muted fst-italic text-center">Aucun défi en cours.</div>
+                        <?php else: ?>
+                            <?php foreach ($defis_apercu as $d): ?>
+                                <div class="list-group-item border-dark d-flex align-items-center p-3">
+                                    <span class="fs-3 me-3"><?= htmlspecialchars($d['avatar']) ?></span>
+                                    <div>
+                                        <h6 class="mb-0 fw-bold"><?= htmlspecialchars($d['titre']) ?></h6>
+                                        <small class="text-muted">Par <?= htmlspecialchars($d['pseudo']) ?></small>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </div>
                 </div>
-            <?php else: ?>
-                <?php foreach ($defis_ouverts as $defi): ?>
-                    <div class="col-md-4">
-                        <div class="card border-dark rounded-0 h-100 shadow-sm">
-                            <div class="card-body text-center">
-                                <div class="display-4 mb-2"><?= htmlspecialchars($defi['avatar']) ?></div>
-                                <h5 class="card-title fw-bold text-uppercase"><?= htmlspecialchars($defi['titre']) ?></h5>
-                                <h6 class="card-subtitle mb-3 text-muted">Lancé par <?= htmlspecialchars($defi['pseudo']) ?></h6>
-                                <p class="card-text small fst-italic">"<?= htmlspecialchars($defi['description']) ?>"</p>
-                            </div>
-                            <div class="card-footer bg-white border-dark border-top-0 text-center pb-3 pt-0">
-                                <!-- Le bouton de réponse pointera vers le traitement de la candidature -->
-                                <a href="voir_defi.php?id=<?= $defi['id_defi'] ?>" class="btn btn-outline-dark fw-bold rounded-0 btn-sm w-100">DÉTAILS DU DÉFI</a>
-                            </div>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            <?php endif; ?>
-        </div>
-    </div>
+            </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+            <div class="col-md-6">
+                <div class="card border-dark rounded-0 shadow-sm h-100">
+                    <div class="card-header bg-dark text-white rounded-0 fw-bold text-uppercase">Top 3 des Brutes</div>
+                    <div class="list-group list-group-flush rounded-0">
+                        <?php if (empty($brutes_apercu)): ?>
+                            <div class="p-3 text-muted fst-italic text-center">Aucune brute inscrite.</div>
+                        <?php else: ?>
+                            <?php foreach ($brutes_apercu as $b): ?>
+                                <a href="voir_brute.php?id=<?= $b['id_user'] ?>" class="list-group-item list-group-item-action border-dark d-flex align-items-center justify-content-between p-3">
+                                    <div class="d-flex align-items-center">
+                                        <span class="fs-3 me-3"><?= htmlspecialchars($b['avatar']) ?></span>
+                                        <h6 class="mb-0 fw-bold text-uppercase"><?= htmlspecialchars($b['pseudo']) ?></h6>
+                                    </div>
+                                    <span class="badge bg-success rounded-0"><?= $b['victoires'] ?> Victoires</span>
+                                </a>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
 </body>
 </html>
