@@ -1,18 +1,18 @@
 <?php
 // db.inc.php
-
-$host = 'localhost'; 
-$dbname = 'pixel_brawlers';
-$user = 'root'; 
-$pass = 'root'; // Le mot de passe par défaut de UwAmp
-
-
-// 2. VERSION DÉPLOIEMENT - À activer juste avant d'envoyer sur le serveur
-
+// version locale
 // $host = 'localhost'; 
-// $dbname = 'bdd_7_5'; 
-// $user = 'grp_7_5'; 
-// $pass = 'uqm4AM5gTVhEmv9f';
+// $dbname = 'pixel_brawlers';
+// $user = 'root'; 
+// $pass = 'root'; 
+
+
+//2. VERSION DÉPLOIEMENT - À activer juste avant d'envoyer sur le serveur
+
+$host = 'moduleweb.fr'; //$host = 'localhost' sur la machine de l'école; 
+$dbname = 'bdd_7_5'; 
+$user = 'grp_7_5'; 
+$pass = 'uqm4AM5gTVhEmv9f';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $user, $pass);
