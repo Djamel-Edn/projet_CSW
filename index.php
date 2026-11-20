@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// APERÇU POUR LES VISITEURS (Critère de la grille)
+// APERÇU POUR LES VISITEURS 
 // 1. Les 3 derniers défis
 $sql_defis = "SELECT d.id_defi, d.titre, b.pseudo, b.avatar 
               FROM defis d JOIN brutes b ON d.id_auteur = b.id_user 
@@ -88,13 +88,13 @@ $brutes_apercu = $pdo->query($sql_brutes)->fetchAll();
                 <ul class="navbar-nav mx-auto">
     <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
         
-        <!-- Liste 1 : Admin -->
+        <!-- Liste pour Admin -->
         <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="communaute.php">COMMUNAUTÉ</a></li>
         <li class="nav-item"><a class="nav-link text-danger fw-bold" href="admin.php">⚙️ ADMIN PANEL</a></li>
         
     <?php else: ?>
         
-        <!-- Liste 2 : Visiteurs / Joueurs -->
+        <!-- Liste pour Visiteurs / Joueurs -->
         <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="index.php">ACCUEIL</a></li>
         <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="arene.php">ARÈNE</a></li>
         <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="communaute.php">COMMUNAUTÉ</a></li>

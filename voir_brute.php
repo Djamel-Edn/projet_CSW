@@ -16,7 +16,6 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute([':id' => $id_cible]);
 $brute = $stmt->fetch();
 
-// Si la brute n'existe pas, on redirige
 if (!$brute) {
     header('Location: communaute.php');
     exit();
@@ -44,13 +43,13 @@ if (!$brute) {
             <ul class="navbar-nav mx-auto">
     <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
         
-        <!-- Liste 1 : Admin -->
+        <!-- Liste pour Admin -->
         <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="communaute.php">COMMUNAUTÉ</a></li>
         <li class="nav-item"><a class="nav-link text-danger fw-bold" href="admin.php">⚙️ ADMIN PANEL</a></li>
         
     <?php else: ?>
         
-        <!-- Liste 2 : Visiteurs / Joueurs -->
+        <!-- Liste pour Visiteurs / Joueurs -->
         <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="index.php">ACCUEIL</a></li>
         <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="arene.php">ARÈNE</a></li>
         <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="communaute.php">COMMUNAUTÉ</a></li>

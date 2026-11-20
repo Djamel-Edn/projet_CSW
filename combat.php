@@ -47,7 +47,7 @@ if (!$id_defi || !$id_candidature) {
             $erreur = "Impossible de trouver les combattants dans l'Arène.";
         } else {
             // 3. INITIALISATION DU COMBAT
-            $pv_auteur = 30; // Règle stricte du sujet au début de chaque combat
+            $pv_auteur = 30; // Règle du projet valeurs fixes 
             $pv_candidat = 30;
             
             $force_auteur = (int)$brute_auteur['force_brute'];
@@ -58,25 +58,25 @@ if (!$id_defi || !$id_candidature) {
 
             $rapport = "⚔️ Le combat commence dans l'Arène !\n\n";
 
-            // Tirage au sort de celui qui attaque en premier (1 = Auteur, 2 = Candidat)
+            // Tirage au sort de celui qui attaque en premier 
             $tour = rand(1, 2);
 
             // 4. BOUCLE DE COMBAT AU TOUR PAR TOUR
             while ($pv_auteur > 0 && $pv_candidat > 0) {
                 if ($tour === 1) {
-                    // L'Auteur attaque
+                 
                     $degats = $force_auteur + rand(0, 2) - $def_candidat;
-                    $degats = max(1, $degats); // Minimum 1 point de dégât
+                    $degats = max(1, $degats);
                     
                     $pv_candidat -= $degats;
-                    $pv_affiches = max(0, $pv_candidat); // Affichage minimum à 0
+                    $pv_affiches = max(0, $pv_candidat); 
                     
                     $rapport .= "➔ {$brute_auteur['pseudo']} attaque ! Il inflige $degats dégâts.\n";
                     $rapport .= "   Il reste $pv_affiches PV à {$brute_candidat['pseudo']}.\n\n";
                     
-                    $tour = 2; // Au tour de l'adversaire
+                    $tour = 2; 
                 } else {
-                    // Le Candidat attaque
+                   
                     $degats = $force_candidat + rand(0, 2) - $def_auteur;
                     $degats = max(1, $degats);
                     
@@ -162,13 +162,13 @@ if (!$id_defi || !$id_candidature) {
             <ul class="navbar-nav mx-auto">
     <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
         
-        <!-- Liste 1 : Admin -->
+        <!-- Liste pour Admin -->
         <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="communaute.php">COMMUNAUTÉ</a></li>
         <li class="nav-item"><a class="nav-link text-danger fw-bold" href="admin.php">⚙️ ADMIN PANEL</a></li>
         
     <?php else: ?>
         
-        <!-- Liste 2 : Visiteurs / Joueurs -->
+        <!-- Liste pour Visiteurs / Joueurs -->
         <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="index.php">ACCUEIL</a></li>
         <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="arene.php">ARÈNE</a></li>
         <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="communaute.php">COMMUNAUTÉ</a></li>

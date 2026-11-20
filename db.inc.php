@@ -2,7 +2,7 @@
 // db.inc.php
 
 
-// 1. VERSION LOCALE (UwAmp) - À utiliser pour coder sur ton PC
+// 1. VERSION LOCALE (UwAmp) 
 
 // $host = 'localhost'; 
 // $dbname = 'pixel_brawlers';
@@ -10,7 +10,7 @@
 // $pass = 'root'; // Le mot de passe par défaut de UwAmp
 
 
-// 2. VERSION DÉPLOIEMENT - À activer juste avant d'envoyer sur le serveur
+// 2. VERSION DÉPLOIEMENT - 
 
 $host = 'localhost';
 $dbname = 'bdd_7_5'; 

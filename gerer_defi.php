@@ -22,7 +22,7 @@ $stmt_defi->execute([':id_defi' => $id_defi, ':id_auteur' => $id_user]);
 $defi = $stmt_defi->fetch();
 
 if (!$defi) {
-    header('Location: ma_brute.php'); // Redirection si ce n'est pas son défi
+    header('Location: ma_brute.php'); 
     exit();
 }
 
@@ -54,7 +54,7 @@ $candidats = $stmt_candidats->fetchAll();
     <!-- NAV UNIFIÉE SANS LE BOUTON MA BRUTE -->
 <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom border-dark border-2">
     <div class="container">
-        <!-- Le logo renvoie vers ma_brute si connecté, sinon vers index -->
+      
         <a class="navbar-brand fw-bold" href="<?= isset($_SESSION['id_user']) ? 'ma_brute.php' : 'index.php' ?>">PIXEL BRAWLERS</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
@@ -63,13 +63,13 @@ $candidats = $stmt_candidats->fetchAll();
            <ul class="navbar-nav mx-auto">
     <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
         
-        <!-- Liste 1 : Admin -->
+        <!-- Liste pour Admin -->
         <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="communaute.php">COMMUNAUTÉ</a></li>
         <li class="nav-item"><a class="nav-link text-danger fw-bold" href="admin.php">⚙️ ADMIN PANEL</a></li>
         
     <?php else: ?>
         
-        <!-- Liste 2 : Visiteurs / Joueurs -->
+        <!-- Liste pour Visiteurs / Joueurs -->
         <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="index.php">ACCUEIL</a></li>
         <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="arene.php">ARÈNE</a></li>
         <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="communaute.php">COMMUNAUTÉ</a></li>
@@ -131,7 +131,7 @@ $candidats = $stmt_candidats->fetchAll();
                                         <div><strong class="d-block text-success">🏆 <?= $c['victoires'] ?></strong><small>V</small></div>
                                     </div>
                                     
-                                    <!-- Formulaire qui déclenchera le combat -->
+                                   
                                     <form action="combat.php" method="POST">
                                         <input type="hidden" name="id_defi" value="<?= $defi['id_defi'] ?>">
                                         <input type="hidden" name="id_candidature" value="<?= $c['id_candidature'] ?>">

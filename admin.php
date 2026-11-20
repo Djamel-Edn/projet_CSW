@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-// Protection stricte : Seul un administrateur peut accéder à cette page
+// Seul un administrateur peut accéder à cette page
 if (!isset($_SESSION['id_user']) || $_SESSION['role'] !== 'admin') {
     header('Location: index.php?erreur=acces_refuse');
     exit();
@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action']) && $_POST['action'] === 'toggle_compte') {
         $id_cible = (int)$_POST['id_utilisateur'];
         
-        // Sécurité : l'admin ne peut pas se désactiver lui-même
+        //l'admin ne peut pas se désactiver lui-même
         if ($id_cible !== $_SESSION['id_user']) {
             // Si actif=1, on passe à 0, sinon on passe à 1
             $sql = "UPDATE utilisateurs SET actif = IF(actif=1, 0, 1) WHERE id_user = :id";
@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     
-    // Action B : Supprimer un défi
+    // deuxième action est Supprimer un défi
     if (isset($_POST['action']) && $_POST['action'] === 'supprimer_defi') {
         $id_defi = (int)$_POST['id_defi'];
         
@@ -77,13 +77,13 @@ $defis = $pdo->query("
            <ul class="navbar-nav mx-auto">
     <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
         
-        <!-- Liste 1 : Admin -->
+        <!-- Liste navbar pour Admin -->
         <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="communaute.php">COMMUNAUTÉ</a></li>
         <li class="nav-item"><a class="nav-link text-danger fw-bold" href="admin.php">⚙️ ADMIN PANEL</a></li>
         
     <?php else: ?>
         
-        <!-- Liste 2 : Visiteurs / Joueurs -->
+        <!-- Liste navbar pour Visiteurs / Joueurs -->
         <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="index.php">ACCUEIL</a></li>
         <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="arene.php">ARÈNE</a></li>
         <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="communaute.php">COMMUNAUTÉ</a></li>
@@ -112,7 +112,7 @@ $defis = $pdo->query("
         <?php endif; ?>
 
         <div class="row g-4">
-            <!-- SECTION : GESTION DES UTILISATEURS -->
+            <!-- SECTION GESTION DES UTILISATEURS -->
             <div class="col-lg-6">
                 <div class="card border-dark rounded-0 shadow-sm h-100">
                     <div class="card-header bg-dark text-white rounded-0 fw-bold text-uppercase py-3">
@@ -160,7 +160,7 @@ $defis = $pdo->query("
                 </div>
             </div>
 
-            <!-- SECTION : GESTION DES DÉFIS -->
+            <!-- panel de GESTION DES DÉFIS -->
             <div class="col-lg-6">
                 <div class="card border-dark rounded-0 shadow-sm h-100">
                     <div class="card-header bg-dark text-white rounded-0 fw-bold text-uppercase py-3">

@@ -1,0 +1,49 @@
+-- Script de création de la base de données Pixel Brawlers
+
+CREATE TABLE IF NOT EXISTS utilisateurs (
+    id_user INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(190) NOT NULL UNIQUE,
+    mot_de_passe VARCHAR(255) NOT NULL,
+    role VARCHAR(20) NOT NULL DEFAULT 'joueur',
+    actif TINYINT(1) NOT NULL DEFAULT 1,
+    date_inscription DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS brutes (
+    id_brute INT AUTO_INCREMENT PRIMARY KEY,
+    id_user INT NOT NULL UNIQUE,
+    pseudo VARCHAR(50) NOT NULL UNIQUE,
+    description TEXT NOT NULL,
+    avatar VARCHAR(50) NOT NULL,
+    pv INT NOT NULL DEFAULT 30,
+    force_brute INT NOT NULL,
+    defense INT NOT NULL,
+    victoires INT NOT NULL DEFAULT 0,
+    defaites INT NOT NULL DEFAULT 0,
+    CONSTRAINT fk_brute_user FOREIGN KEY (id_user) REFERENCES utilisateurs(id_user) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS defis (
+    id_defi INT AUTO_INCREMENT PRIMARY KEY,
+    id_auteur INT NOT NULL,
+    titre VARCHAR(120) NOT NULL,
+    description TEXT NOT NULL,
+    etat ENUM('ouvert', 'termine') NOT NULL DEFAULT 'ouvert',
+    date_creation DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id_vainqueur INT NULL,
+    rapport_combat TEXT NULL,
+    CONSTRAINT fk_defi_auteur FOREIGN KEY (id_auteur) REFERENCES utilisateurs(id_user) ON DELETE CASCADE,
+    CONSTRAINT fk_defi_vainqueur FOREIGN KEY (id_vainqueur) REFERENCES utilisateurs(id_user) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS candidatures (
+    id_candidature INT AUTO_INCREMENT PRIMARY KEY,
+    id_defi INT NOT NULL,
+    id_candidat INT NOT NULL,
+    message TEXT NULL,
+    etat ENUM('en_attente', 'acceptee', 'refusee') NOT NULL DEFAULT 'en_attente',
+    date_candidature DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_cand_defi FOREIGN KEY (id_defi) REFERENCES defis(id_defi) ON DELETE CASCADE,
+    CONSTRAINT fk_cand_user FOREIGN KEY (id_candidat) REFERENCES utilisateurs(id_user) ON DELETE CASCADE,
+    CONSTRAINT uq_candidature_unique UNIQUE (id_defi, id_candidat)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

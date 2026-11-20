@@ -40,7 +40,7 @@ if ($peut_creer && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':description' => $description
             ]);
             $succes = "Ton défi a été lancé avec succès ! Il est maintenant visible dans l'Arène.";
-            $peut_creer = false; // On masque le formulaire après la réussite
+            $peut_creer = false; 
         } catch (PDOException $e) {
             $erreur = "Erreur lors de la création du défi : " . $e->getMessage();
         }
@@ -70,13 +70,13 @@ if ($peut_creer && $_SERVER['REQUEST_METHOD'] === 'POST') {
                <ul class="navbar-nav mx-auto">
     <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
         
-        <!-- Liste 1 : Admin -->
+        <!-- Liste pour Admin -->
         <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="communaute.php">COMMUNAUTÉ</a></li>
         <li class="nav-item"><a class="nav-link text-danger fw-bold" href="admin.php">⚙️ ADMIN PANEL</a></li>
         
     <?php else: ?>
         
-        <!-- Liste 2 : Visiteurs / Joueurs -->
+        <!-- Liste pour Visiteurs / Joueurs -->
         <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="index.php">ACCUEIL</a></li>
         <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="arene.php">ARÈNE</a></li>
         <li class="nav-item"><a class="nav-link text-dark fw-semibold" href="communaute.php">COMMUNAUTÉ</a></li>

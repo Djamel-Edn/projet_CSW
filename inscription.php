@@ -28,10 +28,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($stmt_check->fetch()) {
                 $erreur = "Cet email est déjà utilisé. Veuillez en choisir un autre ou vous connecter.";
             } else {
-                // 2. Hachage du mot de passe en Bcrypt/Blowfish (Critère de la grille)
+                // 2. Hachage du mot de passe en Bcrypt/Blowfish 
                 $mdp_hash = password_hash($password, PASSWORD_DEFAULT);
                 
-                // 3. Insertion sans choix du rôle, le rôle par défaut 'joueur' s'applique (Critère de la grille)
+                // 3. Insertion sans choix du rôle, le rôle par défaut 'joueur' s'applique
                 $sql_insert = "INSERT INTO utilisateurs (email, mot_de_passe) VALUES (:email, :mdp)";
                 $stmt_insert = $pdo->prepare($sql_insert);
                 
@@ -100,14 +100,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 </nav>
 
-    <!-- FORMULAIRE D'INSCRIPTION ADAPTATIF (Critère vue mobile) -->
+    <!-- FORMULAIRE D'INSCRIPTION ADAPTATIF  -->
     <div class="container mt-5 mb-5">
         <div class="row justify-content-center">
             <div class="col-12 col-md-8 col-lg-5">
                 <div class="register-box shadow-sm">
                     <h4 class="fw-bold mb-4 text-center">CRÉER UN COMPTE</h4>
 
-                    <!-- Messages de retour (Critères de la grille) -->
                     <?php if (!empty($erreur)): ?>
                         <div class="alert alert-danger rounded-0" role="alert">
                             <?= htmlspecialchars($erreur) ?>
